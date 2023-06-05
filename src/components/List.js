@@ -16,8 +16,25 @@ export default function List() {
   }, []);
 
   async function getLists() {
-    const { data } = await supabase.from("lists").select();
+    const { data } = await supabase.from("lists").select().order("created_at");
     setListItems(data);
+  }
+
+  async function handleCheck(event) {
+    event.preventDefault();
+
+    const id = event.target.id;
+
+    const listItem = listItems.filter((listItem) => {
+      return listItem.id === id;
+    })[0];
+
+    await supabase
+      .from("lists")
+      .update({ ...listItem, checked: !listItem.checked })
+      .eq("id", id);
+
+    getLists();
   }
 
   return (
@@ -28,7 +45,13 @@ export default function List() {
           return (
             <li key={listItem.id}>
               {listItem.content}
-              <input type="checkbox" name={listItem.content} id={listItem.id} />
+              <input
+                type="checkbox"
+                name={listItem.content}
+                id={listItem.id}
+                checked={listItem.checked}
+                onChange={handleCheck}
+              />
             </li>
           );
         })}
