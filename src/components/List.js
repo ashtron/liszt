@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 import "./list.css";
@@ -10,6 +10,8 @@ const supabase = createClient(
 
 export default function List() {
   const [listItems, setListItems] = useState([]);
+  const [addingItem, setAddingItem] = useState(false);
+  const [newItemContent, setNewItemContent] = useState("");
 
   useEffect(() => {
     getLists();
@@ -20,7 +22,7 @@ export default function List() {
     setListItems(data);
   }
 
-  async function handleCheck(event) {
+  async function handleChange(event) {
     event.preventDefault();
 
     const id = event.target.id;
@@ -37,6 +39,32 @@ export default function List() {
     getLists();
   }
 
+  async function handleClick(event) {
+    event.preventDefault();
+
+    setAddingItem(true);
+  }
+
+  async function handleKeyDown(event) {
+    if (event.keyCode === 13) {
+      const newListItem = {
+        content: event.target.value,
+        checked: false,
+      };
+
+      await supabase.from("lists").insert([newListItem]);
+
+      setAddingItem(false);
+      getLists();
+    }
+  }
+
+  function handleNewInputChange(event) {
+    event.preventDefault();
+
+    setNewItemContent(event.target.value);
+  }
+
   return (
     <article>
       <header>Todos</header>
@@ -50,12 +78,26 @@ export default function List() {
                 name={listItem.content}
                 id={listItem.id}
                 checked={listItem.checked}
-                onChange={handleCheck}
+                onChange={handleChange}
               />
             </li>
           );
         })}
+        {addingItem ? (
+          <input
+            type="text"
+            autoFocus
+            onKeyDown={handleKeyDown}
+            onChange={handleNewInputChange}
+            value={newItemContent}
+          ></input>
+        ) : (
+          ""
+        )}
       </ul>
+      <footer>
+        <button onClick={handleClick}>+</button>
+      </footer>
     </article>
   );
 }
