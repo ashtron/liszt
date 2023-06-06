@@ -1,5 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+
+import Checkbox from "./Checkbox";
+import NewItemInput from "./NewItemInput";
 
 import "./list.css";
 
@@ -59,7 +62,7 @@ export default function List() {
     }
   }
 
-  function handleNewInputChange(event) {
+  function handleNewItemInputChange(event) {
     event.preventDefault();
 
     setNewItemContent(event.target.value);
@@ -73,24 +76,16 @@ export default function List() {
           return (
             <li key={listItem.id}>
               {listItem.content}
-              <input
-                type="checkbox"
-                name={listItem.content}
-                id={listItem.id}
-                checked={listItem.checked}
-                onChange={handleChange}
-              />
+              <Checkbox listItem={listItem} handleChange={handleChange} />
             </li>
           );
         })}
         {addingItem ? (
-          <input
-            type="text"
-            autoFocus
-            onKeyDown={handleKeyDown}
-            onChange={handleNewInputChange}
-            value={newItemContent}
-          ></input>
+          <NewItemInput
+            handleChange={handleNewItemInputChange}
+            handleKeyDown={handleKeyDown}
+            newItemContent={newItemContent}
+          />
         ) : (
           ""
         )}
